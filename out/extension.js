@@ -8,7 +8,19 @@ const child_process_1 = require("child_process");
 const fs = require("fs");
 let lastErrorCount = 0;
 let lastPlayTime = 0;
-let soundPlayer = null;
+/** Current playback process so we can stop it when a new error triggers (one sound at a time) */
+let currentPlaybackProcess = null;
+function stopCurrentSound() {
+    if (currentPlaybackProcess) {
+        try {
+            currentPlaybackProcess.kill('SIGKILL');
+        }
+        catch {
+            // ignore
+        }
+        currentPlaybackProcess = null;
+    }
+}
 function activate(context) {
     const config = vscode.workspace.getConfiguration('errorSound');
     const debounceMs = config.get('debounceMs', 500);
@@ -66,6 +78,7 @@ function getSoundPath(context) {
     return null;
 }
 function playSound(context) {
+    stopCurrentSound();
     const config = vscode.workspace.getConfiguration('errorSound');
     const debug = config.get('debug', false);
     const soundPath = getSoundPath(context);
@@ -81,7 +94,8 @@ function playSound(context) {
         if (fs.existsSync(systemSound)) {
             if (debug)
                 console.log('[Error Sound] Playing system sound (no custom file in media/)');
-            (0, child_process_1.exec)(`afplay "${systemSound}"`, (err) => {
+            currentPlaybackProcess = (0, child_process_1.exec)(`afplay "${systemSound}"`, (err) => {
+                currentPlaybackProcess = null;
                 if (err)
                     console.warn('[Error Sound] afplay failed:', err.message);
             });
@@ -93,37 +107,21 @@ function playSound(context) {
     fallbackBeep();
 }
 function playSoundFile(soundPath) {
-    try {
-        if (!soundPlayer) {
-            soundPlayer = require('play-sound')({});
-        }
-        const player = soundPlayer;
-        if (player) {
-            player.play(soundPath, (err) => {
-                if (err) {
-                    console.warn('[Error Sound] play-sound failed:', err.message);
-                    playViaSystemPlayer(soundPath);
-                }
-            });
-        }
-        else {
-            playViaSystemPlayer(soundPath);
-        }
-    }
-    catch (e) {
-        playViaSystemPlayer(soundPath);
-    }
+    // Always use system player so we can stop it when a new error triggers (single sound at a time)
+    playViaSystemPlayer(soundPath);
 }
 function playViaSystemPlayer(soundPath) {
     const platform = process.platform;
     if (platform === 'darwin') {
-        (0, child_process_1.exec)(`afplay "${soundPath}"`, (err) => {
+        currentPlaybackProcess = (0, child_process_1.exec)(`afplay "${soundPath}"`, (err) => {
+            currentPlaybackProcess = null;
             if (err)
                 console.warn('[Error Sound] afplay failed:', err.message);
         });
     }
     else if (platform === 'linux') {
-        (0, child_process_1.exec)(`paplay "${soundPath}" || aplay "${soundPath}"`, (err) => {
+        currentPlaybackProcess = (0, child_process_1.exec)(`paplay "${soundPath}" || aplay "${soundPath}"`, (err) => {
+            currentPlaybackProcess = null;
             if (err)
                 console.warn('[Error Sound] Linux player failed:', err.message);
         });
@@ -137,6 +135,6 @@ function fallbackBeep() {
     process.stdout.write('\x07');
 }
 function deactivate() {
-    soundPlayer = null;
+    stopCurrentSound();
 }
 //# sourceMappingURL=extension.js.map
