@@ -1,15 +1,14 @@
 {
-  "name": "error-sound-extension",
-  "displayName": "Error Sound",
+  "name": "kattakada-error-sound-extension",
+  "displayName": "Kattakada Error Sound",
   "description": "Plays a sound when a diagnostic error appears in your code",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publisher": "Abishek",
   "engines": {
     "vscode": "^1.85.0"
   },
   "categories": [
-    "Other",
-    "Accessibility"
+    "Other"
   ],
   "keywords": [
     "error",
@@ -20,12 +19,17 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/abishek093/error-sound-extension"
+    "url": "https://github.com/Abishek093/error-sound-extension"
   },
   "bugs": {
     "url": "https://github.com/abishek093/error-sound-extension/issues"
   },
   "license": "MIT",
+  "icon": "images/icon.png",
+  "galleryBanner": {
+    "color": "#2d2d2d",
+    "theme": "dark"
+  },
   "activationEvents": [
     "onStartupFinished"
   ],

@@ -1,3 +1,6 @@
 HOW-TO-TEST.md
 PUBLISH.md
 README.md
+node_modules/
+*.vsix
+.DS_Store
