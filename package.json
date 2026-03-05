@@ -2,7 +2,7 @@
   "name": "kattakada-error-sound-extension",
   "displayName": "Kattakada Error Sound",
   "description": "Plays a sound when a diagnostic error appears in your code",
-  "version": "0.1.1",
+  "version": "0.1.3",
   "publisher": "Abishek",
   "engines": {
     "vscode": "^1.85.0"
